@@ -59,4 +59,3 @@ npm run build      # production build
 ## License
 
 MIT — see [LICENSE](LICENSE). Dashboard front-end by Rish Dhingra; product & direction by **Azra Bano**.
-
