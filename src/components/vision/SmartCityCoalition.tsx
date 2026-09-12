@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { useAppStore } from '../../store/useAppStore'
 import { Network, ArrowRight, Building2 } from 'lucide-react'
 import { useMemo } from 'react'
 
@@ -14,7 +13,7 @@ const coalitionSites = [
   { name: 'Newark', lat: 40.7357, lng: -74.1724, level: 'City', status: 'planned' },
   { name: 'New York City', lat: 40.7128, lng: -74.006, level: 'Metro', status: 'planned' },
   { name: 'New Jersey', lat: 40.2989, lng: -74.5210, level: 'State', status: 'planned' },
-]
+] as const
 
 // Fix for default markers in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -46,7 +45,6 @@ function createCoalitionIcon(status: 'active' | 'planned', level: string) {
 }
 
 export function SmartCityCoalition() {
-  const { bins } = useAppStore()
 
   const mapCenter = useMemo(() => [40.65, -74.2] as [number, number], [])
 
