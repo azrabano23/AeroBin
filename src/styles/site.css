@@ -17,8 +17,10 @@
 
   background: var(--bg);
   color: var(--fg);
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+  --site-font: 'IBM Plex Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
     Consolas, 'Liberation Mono', monospace;
+
+  font-family: var(--site-font);
   font-size: 14px;
   line-height: 1.65;
   font-variant-ligatures: none;
@@ -128,8 +130,9 @@
 
 /* ── sections ────────────────────────────────────────────────────────── */
 
-.sec { border-top: 1px solid var(--line); padding: 72px 0; }
-.sec-head { margin-bottom: 32px; }
+.sec { border-top: 1px solid var(--line); padding-block: 72px; }
+.sec > .wrap { display: flex; flex-direction: column; gap: 30px; }
+.sec-head { margin: 0; }
 
 .sec-label {
   display: flex;
@@ -186,6 +189,11 @@
 }
 .ascii::-webkit-scrollbar { height: 4px; }
 .ascii::-webkit-scrollbar-thumb { background: var(--line-2); }
+
+@media (max-width: 720px) {
+  /* the narrow ascii variants are tuned to ~34 cols; buy them headroom */
+  .ascii { font-size: 11.5px; }
+}
 
 .ascii-dim { color: var(--dim); }
 .ascii-fg { color: var(--mut); }
@@ -390,7 +398,8 @@
 
 /* ── closing cta ─────────────────────────────────────────────────────── */
 
-.cta { text-align: center; padding: 84px 0; }
+.cta { text-align: center; padding-block: 84px; }
+.cta > .wrap { align-items: center; gap: 0; }
 .cta h2 {
   font-size: clamp(20px, 3.4vw, 30px);
   font-weight: 600;
@@ -414,17 +423,34 @@
 .foot a:hover { color: var(--acc); }
 .foot .spacer { margin-left: auto; }
 
-/* ── scroll reveal ───────────────────────────────────────────────────── */
+/* ── misc ───────────────────────────────────────────────────────────────── */
 
-.rv {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+.caption {
+  margin-top: 14px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--dim);
 }
-.rv.in { opacity: 1; transform: none; }
+
+.hero-term { margin-top: 34px; }
+
+.steps li { margin-bottom: 13px; }
+.steps a { color: var(--mut); border-bottom: 1px dotted var(--dim); }
+.steps a:hover { color: var(--acc); border-color: var(--acc-dim); }
+
+.talk-kicker {
+  font-size: 11.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mut);
+  margin-bottom: 18px;
+}
+
+.wordmark.talk {
+  font-size: clamp(4.4px, 1.24vw, 13px);
+  margin: 0 0 30px;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .rv { opacity: 1; transform: none; transition: none; }
   .cursor { animation: none; }
 }
