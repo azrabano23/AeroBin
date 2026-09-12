@@ -2,11 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/site.css'
 
-/* ── config ───────────────────────────────────────────────────────────────
-   >>> CHANGE THIS to the address you want investors to reach you at. <<<
-   ───────────────────────────────────────────────────────────────────────── */
+/* ── config ─────────────────────────────────────────────────────────────── */
 
-const CONTACT_EMAIL = 'hello@aerobin.io'
+const CONTACT_EMAIL = 'azrabano.work@gmail.com'
 
 /* ── ascii ─────────────────────────────────────────────────────────────── */
 
