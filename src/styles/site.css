@@ -255,11 +255,15 @@ h2.t {
 /* ── capability rows ──────────────────────────────────────────────────── */
 
 .caps { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-.cap { background: var(--card); padding: clamp(26px, 3.4vw, 40px); display: grid; grid-template-columns: 54px 1.15fr 1fr; gap: clamp(18px, 3vw, 44px); align-items: start; }
-@media (max-width: 860px) { .cap { grid-template-columns: 1fr; gap: 14px; } }
+.cap { background: var(--card); padding: clamp(26px, 3.4vw, 40px); display: grid; grid-template-columns: 54px 1.15fr 1fr; gap: clamp(18px, 3vw, 44px); align-items: stretch; }
+@media (max-width: 860px) { .cap { grid-template-columns: 1fr; gap: 14px; align-items: start; } }
 .cap .num { font-family: var(--mono); font-size: 11.5px; color: var(--grn); padding-top: 7px; letter-spacing: .08em; }
-.cap h3 { font-size: clamp(21px, 2.6vw, 28px); font-weight: 500; letter-spacing: -.028em; margin: 0 0 12px; line-height: 1.16; }
-.cap p { color: var(--mut); margin: 0; font-size: 15px; line-height: 1.6; }
+/* the copy is shorter than the visual beside it, so it centres against it
+   rather than hanging from the top over a column of dead white */
+.cap-txt { display: flex; flex-direction: column; justify-content: center; }
+@media (max-width: 860px) { .cap-txt { justify-content: flex-start; } }
+.cap h3 { font-size: clamp(21px, 2.7vw, 29px); font-weight: 500; letter-spacing: -.028em; margin: 0 0 13px; line-height: 1.16; }
+.cap p { color: var(--mut); margin: 0; font-size: 15.5px; line-height: 1.62; }
 .cap p b { color: var(--ink); font-weight: 500; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--mut); border: 1px solid var(--line-2); border-radius: var(--r-pill); padding: 5px 11px; }
@@ -384,9 +388,11 @@ h2.t {
   font-family: var(--mono); font-size: 10px; letter-spacing: .05em;
   color: var(--dim); line-height: 1.5;
 }
-.fig-2 { display: flex; flex-direction: column; gap: 14px; }
+/* before and after sit side by side: stacked, this one figure was twice the
+   height of the other three and dragged its whole row out of line */
+.fig-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: end; }
 .fig-2 > div { display: flex; flex-direction: column; gap: 7px; }
-.fig-2 span { font-size: 12.5px; color: var(--mut); }
+.fig-2 span { font-size: 12.5px; color: var(--mut); line-height: 1.35; }
 .fig-2 b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ── the guess: the page's hook ─────────────────────────────────────── */
@@ -633,11 +639,11 @@ h2.t {
 
 /* ── checkmark lists on the capability figures ──────────────────────── */
 
-.checks { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
-.checks li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-2); list-style: none; }
+.checks { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.checks li { display: flex; align-items: center; gap: 11px; font-size: 14.5px; color: var(--ink-2); list-style: none; }
 .checks svg { width: 18px; height: 18px; flex: none; }
 .cap-tags {
-  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line);
   font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
   text-transform: uppercase; color: var(--dim);
 }
@@ -730,9 +736,17 @@ h2.t {
 
 /* ── capability visuals: the product shot above the drawn figure ────── */
 
+/* every crop is exported at 3:2 and every figure gets the same fixed block,
+   so all four rows come out the same height instead of 381 / 500 / 608 */
 .cap-vis { display: flex; flex-direction: column; gap: 18px; }
 .cap-vis > img {
-  display: block; width: 100%; height: auto; border-radius: var(--r-sm);
+  display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover;
+  object-position: center top; border-radius: var(--r-sm);
   border: 1px solid var(--line); background: #0B0F19;
   box-shadow: 0 16px 38px -26px rgba(20,23,15,.5);
 }
+.cap-vis .fig { min-height: 150px; justify-content: center; }
+/* an outermost svg with no width attribute defaults to 100%, so capping the
+   height alone just letterboxes it: cap the width and let height follow */
+.cap-vis .fig > svg { max-width: 250px; }
+.cap-vis .fig figcaption { margin-top: auto; }

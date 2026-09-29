@@ -1,8 +1,10 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import columbia from '../../data/columbia.json'
 
-/* Drag the handle: left of it is the calendar a crew drives today, right of
-   it is the run AeroBin hands them. Same forty bins, same morning.
+/* Left of the wipe is the calendar a crew drives today, right of it is the
+   run AeroBin hands them. Same forty bins, same morning.
+   The wipe sweeps on its own so the comparison reads without anyone touching
+   it; dragging takes it over, and it picks itself back up afterwards.
    Drawn from the real Columbia fleet coordinates, so it works with or
    without a basemap. */
 
@@ -50,11 +52,73 @@ function tour(pts: Array<{ x: number; y: number }>) {
   return order.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
 }
 
+const LO = 10
+const HI = 90
+const START = 52
+const PERIOD = 8200 // one full there-and-back sweep
+const RESUME = 2200 // how long a hand on the handle holds the sweep off
+
+const clamp = (v: number) => Math.max(6, Math.min(94, v))
+const smooth = (t: number) => t * t * (3 - 2 * t)
+/* inverse of smooth, so a sweep that a pointer interrupted picks up from
+   where the pointer left it instead of snapping back to the cycle start */
+const unsmooth = (y: number) => 0.5 - Math.sin(Math.asin(1 - 2 * Math.min(1, Math.max(0, y))) / 3)
+const phaseFor = (pct: number) => unsmooth((pct - LO) / (HI - LO)) / 2
+
 export function Swipe() {
   const pts = useProjected()
-  const [pct, setPct] = useState(52)
   const box = useRef<HTMLDivElement>(null)
+  const clipL = useRef<SVGRectElement>(null)
+  const clipR = useRef<SVGRectElement>(null)
+  const line = useRef<SVGLineElement>(null)
+  const tagL = useRef<HTMLSpanElement>(null)
+  const tagR = useRef<HTMLSpanElement>(null)
+  const handle = useRef<HTMLDivElement>(null)
+  const input = useRef<HTMLInputElement>(null)
   const drag = useRef(false)
+  const cur = useRef(START)
+  /* null means the sweep owns the wipe; a timestamp means a pointer took it
+     over, and the sweep takes it back RESUME later */
+  const held = useRef<number | null>(null)
+
+  /* the wipe is written straight to the DOM rather than held in state: at
+     60fps, re-rendering eighty circles a frame is a stutter nobody needs */
+  const apply = (p: number) => {
+    cur.current = p
+    const x = (p / 100) * W
+    clipL.current?.setAttribute('width', String(x))
+    clipR.current?.setAttribute('x', String(x))
+    line.current?.setAttribute('x1', String(x))
+    line.current?.setAttribute('x2', String(x))
+    /* each label belongs to its side, so it fades out once the wipe has
+       passed over it rather than sitting on top of the other side */
+    const fade = (lo: number, hi: number) => String(Math.max(0, Math.min(1, (p - lo) / (hi - lo))))
+    if (tagL.current) tagL.current.style.opacity = fade(16, 30)
+    if (tagR.current) tagR.current.style.opacity = fade(88, 72)
+    if (handle.current) handle.current.style.left = `${p}%`
+    if (input.current) input.current.value = String(Math.round(p))
+  }
+
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    let raf = 0
+    let t0 = performance.now() - phaseFor(START) * PERIOD
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick)
+      if (drag.current) return
+      if (held.current !== null) {
+        if (t - held.current < RESUME) return
+        held.current = null
+        t0 = t - phaseFor(cur.current) * PERIOD
+      }
+      const phase = ((t - t0) % PERIOD) / PERIOD
+      // ease in and out of both ends so it never snaps at the turn
+      const tri = phase < 0.5 ? phase * 2 : 2 - phase * 2
+      apply(LO + smooth(tri) * (HI - LO))
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   const all = useMemo(() => tour(pts), [pts])
   const few = useMemo(() => tour(pts.filter((b) => b.fill >= FULL)), [pts])
@@ -63,8 +127,10 @@ export function Swipe() {
   const move = (clientX: number) => {
     const r = box.current?.getBoundingClientRect()
     if (!r) return
-    setPct(Math.max(6, Math.min(94, ((clientX - r.left) / r.width) * 100)))
+    held.current = performance.now()
+    apply(clamp(((clientX - r.left) / r.width) * 100))
   }
+  const release = () => { drag.current = false; held.current = performance.now() }
 
   return (
     <div
@@ -72,13 +138,13 @@ export function Swipe() {
       ref={box}
       onPointerDown={(e) => { drag.current = true; move(e.clientX) }}
       onPointerMove={(e) => drag.current && move(e.clientX)}
-      onPointerUp={() => (drag.current = false)}
-      onPointerLeave={() => (drag.current = false)}
+      onPointerUp={release}
+      onPointerLeave={release}
     >
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="The same forty bins under a fixed schedule and under AeroBin">
         <defs>
-          <clipPath id="sw-l"><rect x="0" y="0" width={(pct / 100) * W} height={H} /></clipPath>
-          <clipPath id="sw-r"><rect x={(pct / 100) * W} y="0" width={W} height={H} /></clipPath>
+          <clipPath id="sw-l"><rect ref={clipL} x="0" y="0" width={(START / 100) * W} height={H} /></clipPath>
+          <clipPath id="sw-r"><rect ref={clipR} x={(START / 100) * W} y="0" width={W} height={H} /></clipPath>
           <pattern id="sw-grid" width="52" height="52" patternUnits="userSpaceOnUse">
             <path d="M52 0H0v52" fill="none" stroke="rgba(20,23,15,.06)" strokeWidth="1" />
           </pattern>
@@ -111,22 +177,23 @@ export function Swipe() {
           })}
         </g>
 
-        <line x1={(pct / 100) * W} y1="0" x2={(pct / 100) * W} y2={H} stroke="#fff" strokeWidth="3" />
+        <line ref={line} x1={(START / 100) * W} y1="0" x2={(START / 100) * W} y2={H} stroke="#fff" strokeWidth="3" />
       </svg>
 
-      <span className="sw-tag l">Fixed schedule · <b>{pts.length} stops</b></span>
-      <span className="sw-tag r">AeroBin · <b>{need} stops</b></span>
+      <span ref={tagL} className="sw-tag l">Fixed schedule · <b>{pts.length} stops</b></span>
+      <span ref={tagR} className="sw-tag r">AeroBin · <b>{need} stops</b></span>
 
-      <div className="sw-handle" style={{ left: `${pct}%` }} aria-hidden>
+      <div ref={handle} className="sw-handle" style={{ left: `${START}%` }} aria-hidden>
         <svg viewBox="0 0 24 24" fill="none">
           <path d="M9.5 7.5L5.5 12l4 4.5M14.5 7.5l4 4.5-4 4.5" stroke="#14170F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
 
       <input
-        className="sw-input" type="range" min="6" max="94" value={pct}
-        onChange={(e) => setPct(Number(e.target.value))}
-        aria-label="Drag between the fixed schedule and the AeroBin route"
+        ref={input}
+        className="sw-input" type="range" min="6" max="94" defaultValue={START}
+        onChange={(e) => { held.current = performance.now(); apply(Number(e.target.value)) }}
+        aria-label="Wipe between the fixed schedule and the AeroBin route"
       />
     </div>
   )

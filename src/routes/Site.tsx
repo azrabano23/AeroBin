@@ -345,7 +345,7 @@ export function Site() {
             <div className="backed-l">The same forty bins, the same morning</div>
             <Swipe />
             <div className="src" style={{ marginTop: 12 }}>
-              Drag the handle. Real Columbia fleet coordinates, simulated fill levels.
+              Real Columbia fleet coordinates, simulated fill levels.
             </div>
           </div>
 
@@ -400,7 +400,7 @@ export function Site() {
             ].map((c) => (
               <div className="cap" key={c.n}>
                 <div className="num">{c.n}</div>
-                <div>
+                <div className="cap-txt">
                   <h3>{c.h}</h3>
                   <p>{c.p}</p>
                   <ul className="checks">

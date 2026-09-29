@@ -1,3 +1,5 @@
+import columbia from '../../data/columbia.json'
+
 /* Small figures that sit beside each capability. Status colours are the
    validated trio: good #0E7A4A, warning #D6A215, critical #C0392B.
    Every figure carries its own labels, which is also the relief the
@@ -36,9 +38,15 @@ export function FillCurve() {
   )
 }
 
-/* 02 — the stop list, before and after */
+/* 02 — the stop list, before and after. Counted off the same Columbia fleet
+   and the same 80% threshold as the wipe above, so the two cannot disagree
+   about how many stops the morning actually has. */
+const FULL = 80
+const OVER = columbia.map((b, i) => ({ i, full: b.fill >= FULL }))
+
 export function StopDots() {
-  const total = 40, need = 6
+  const total = OVER.length
+  const need = OVER.filter((b) => b.full).length
   const cell = (n: number, on: (i: number) => boolean, c: string) =>
     Array.from({ length: n }, (_, i) => (
       <circle key={i} cx={6 + (i % 10) * 12} cy={6 + Math.floor(i / 10) * 12}
@@ -48,19 +56,19 @@ export function StopDots() {
     <figure className="fig">
       <div className="fig-2">
         <div>
-          <svg viewBox="0 0 122 54" role="img" aria-label="Fixed schedule visits all forty bins">
+          <svg viewBox="0 0 122 54" role="img" aria-label={`Fixed schedule visits all ${total} bins`}>
             {cell(total, () => true, INK)}
           </svg>
-          <span><b>40</b> stops, every bin</span>
+          <span><b>{total}</b> stops, every bin</span>
         </div>
         <div>
-          <svg viewBox="0 0 122 54" role="img" aria-label="AeroBin visits only the six bins that are full">
-            {cell(total, (i) => i % 7 === 0, CRIT)}
+          <svg viewBox="0 0 122 54" role="img" aria-label={`AeroBin visits only the ${need} bins that are full`}>
+            {cell(total, (i) => OVER[i].full, CRIT)}
           </svg>
           <span><b style={{ color: GOOD }}>{need}</b> stops, only the full ones</span>
         </div>
       </div>
-      <figcaption>One morning on a 40 bin campus</figcaption>
+      <figcaption>One morning on a {total} bin campus</figcaption>
     </figure>
   )
 }
