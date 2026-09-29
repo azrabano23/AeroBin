@@ -246,38 +246,6 @@ export function CityMap() {
           )}
         </div>
 
-        <div className="scrub">
-          <button
-            className={`scrub-play${playing ? ' on' : ''}`}
-            onClick={() => setPlaying((p) => !p)}
-            aria-label={playing ? 'Pause the week' : 'Play the week'}
-          >
-            {playing ? (
-              <svg viewBox="0 0 16 16"><rect x="4" y="3" width="3" height="10" rx="1" fill="currentColor"/><rect x="9" y="3" width="3" height="10" rx="1" fill="currentColor"/></svg>
-            ) : (
-              <svg viewBox="0 0 16 16"><path d="M5 3.4v9.2a.6.6 0 0 0 .92.5l7.2-4.6a.6.6 0 0 0 0-1l-7.2-4.6a.6.6 0 0 0-.92.5Z" fill="currentColor"/></svg>
-            )}
-          </button>
-
-          <div className="scrub-days">
-            {DAYS.map((d, i) => (
-              <button
-                key={d}
-                className={`scrub-d${i === day ? ' on' : ''}`}
-                onClick={() => { setDay(i); setPlaying(false) }}
-              >
-                <span className="bar" style={{ height: `${8 + (week[i] / Math.max(...week, 1)) * 28}px` }} />
-                <span className="n">{week[i]}</span>
-                <span className="d">{d}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="scrub-note">
-            Stops per morning. <b>The route is different every day,</b> which is exactly what a
-            fixed schedule cannot be.
-          </div>
-        </div>
 
         <aside className="cm-side">
           <div className="cm-place">
@@ -319,6 +287,39 @@ export function CityMap() {
             {c.bins.length} bins · {c.source} · fill levels simulated
           </div>
         </aside>
+
+        <div className="scrub">
+          <button
+            className={`scrub-play${playing ? ' on' : ''}`}
+            onClick={() => setPlaying((p) => !p)}
+            aria-label={playing ? 'Pause the week' : 'Play the week'}
+          >
+            {playing ? (
+              <svg viewBox="0 0 16 16"><rect x="4" y="3" width="3" height="10" rx="1" fill="currentColor"/><rect x="9" y="3" width="3" height="10" rx="1" fill="currentColor"/></svg>
+            ) : (
+              <svg viewBox="0 0 16 16"><path d="M5 3.4v9.2a.6.6 0 0 0 .92.5l7.2-4.6a.6.6 0 0 0 0-1l-7.2-4.6a.6.6 0 0 0-.92.5Z" fill="currentColor"/></svg>
+            )}
+          </button>
+
+          <div className="scrub-days">
+            {DAYS.map((d, i) => (
+              <button
+                key={d}
+                className={`scrub-d${i === day ? ' on' : ''}`}
+                onClick={() => { setDay(i); setPlaying(false) }}
+              >
+                <span className="bar" style={{ height: `${8 + (week[i] / Math.max(...week, 1)) * 28}px` }} />
+                <span className="n">{week[i]}</span>
+                <span className="d">{d}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="scrub-note">
+            Stops per morning. <b>The route is different every day,</b> which is exactly what a
+            fixed schedule cannot be.
+          </div>
+        </div>
       </div>
     </div>
   )
