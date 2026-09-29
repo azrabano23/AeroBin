@@ -362,3 +362,29 @@ h2.t {
 .hero-mark img { height: 40px; width: auto; }
 .hero-mark span { font-size: 23px; font-weight: 600; letter-spacing: -.028em; }
 @media (max-width: 640px) { .hero-mark img { height: 32px; } .hero-mark span { font-size: 19px; } }
+
+/* ── wordmarks sit in the same row as real logos, so they need to match
+      the optical weight of a logo rather than read as body copy.      */
+
+.backed-g .wordmark {
+  font-size: 19px; font-weight: 600; letter-spacing: -.028em;
+  color: var(--mut); opacity: .72; transition: color .25s, opacity .25s, transform .25s cubic-bezier(.34,1.4,.64,1);
+}
+.backed-g .wordmark:hover { color: var(--ink); opacity: 1; transform: translateY(-2px); }
+@media (max-width: 640px) { .backed-g .wordmark { font-size: 15px; } }
+
+/* ── figures beside each capability ─────────────────────────────────── */
+
+.fig { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+/* the dot grid has a much shorter viewBox than the line charts, so an
+   unconstrained width:100% blows its marks up; cap it per figure */
+.fig svg { width: 100%; height: auto; display: block; max-width: 300px; }
+.fig-2 svg { max-width: 190px; }
+.fig figcaption {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .05em;
+  color: var(--dim); line-height: 1.5;
+}
+.fig-2 { display: flex; flex-direction: column; gap: 14px; }
+.fig-2 > div { display: flex; flex-direction: column; gap: 7px; }
+.fig-2 span { font-size: 12.5px; color: var(--mut); }
+.fig-2 b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }

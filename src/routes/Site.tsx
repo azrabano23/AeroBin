@@ -2,17 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/site.css'
 import { CityMap } from '../components/site/CityMap'
+import { FillCurve, StopDots, ContamBar, SavedArea } from '../components/site/Figures'
 import icon from '../assets/logos/aerobin-icon.png'
 import rutgers from '../assets/logos/rutgers.png'
 import columbiaL from '../assets/logos/columbia.png'
-import berkeleyL from '../assets/logos/berkeley.png'
 import winlab from '../assets/logos/winlab.png'
 import nsfcss from '../assets/logos/nsf-css.png'
 import njeda from '../assets/logos/njeda.png'
 import nycedc from '../assets/logos/nycedc.png'
 import nec from '../assets/logos/nec.png'
-import middlesex from '../assets/logos/middlesex.png'
-import fau from '../assets/logos/fau.png'
 import njL from '../assets/logos/nj.png'
 
 const CAL = 'https://calendar.app.google/rJh5jvabPLHewpj18'
@@ -151,28 +149,38 @@ const BIN_TYPES = [
   },
 ]
 
-const BACKERS: Array<[string, string]> = [
-  [rutgers, 'Rutgers University'],
+const BACKED_BY: Array<[string, string]> = [[rutgers, 'Rutgers University']]
+
+/* Real marks where the deck carried one, set wordmarks where it did not. */
+const TALENT: Array<[string, string] | string> = [
+  'Google',
+  'Y Combinator',
+  'NASA',
+  'Goldman Sachs',
+  'Yale',
+  'MIT',
   [columbiaL, 'Columbia University'],
-  [berkeleyL, 'UC Berkeley'],
+  [rutgers, 'Rutgers University'],
   [winlab, 'WINLAB'],
   [nsfcss, 'NSF Center for Smart Streetscapes'],
-  [njeda, 'New Jersey EDA'],
   [nycedc, 'NYC EDC'],
-  [nec, 'NEC Labs America'],
-  [middlesex, 'Middlesex County NJ'],
-  [fau, 'Florida Atlantic University'],
+  [njeda, 'New Jersey EDA'],
   [njL, 'State of New Jersey'],
+  [nec, 'NEC Labs America'],
 ]
 
-function Backers({ label }: { label: string }) {
+function LogoRow({ label, items }: { label: string; items: Array<[string, string] | string> }) {
   return (
     <>
       <div className="backed-l">{label}</div>
       <div className="backed-g">
-        {BACKERS.map(([src, name]) => (
-          <img key={name} src={src} alt={name} title={name} />
-        ))}
+        {items.map((it) =>
+          typeof it === 'string' ? (
+            <span className="wordmark" key={it}>{it}</span>
+          ) : (
+            <img key={it[1]} src={it[0]} alt={it[1]} title={it[1]} />
+          ),
+        )}
       </div>
     </>
   )
@@ -271,7 +279,7 @@ export function Site() {
       </header>
 
       <section className="wrap backed">
-        <Backers label="Backed by" />
+        <LogoRow label="Backed by" items={BACKED_BY} />
       </section>
 
       {/* ── problem ── */}
@@ -330,15 +338,15 @@ export function Site() {
           </div>
           <div className="caps rise d1">
             {[
-              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, t: ['fill level', 'continuous', 'per bin'] },
-              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, t: ['routing', 'daily', 'dispatch'] },
-              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, t: ['contamination', 'recycling', 'alerts'] },
-              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, t: ['roi', 'esg reporting', 'sla'] },
+              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, fig: <FillCurve /> },
+              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, fig: <StopDots /> },
+              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, fig: <ContamBar /> },
+              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, fig: <SavedArea /> },
             ].map((c) => (
               <div className="cap" key={c.n}>
                 <div className="num">{c.n}</div>
                 <div><h3>{c.h}</h3><p>{c.p}</p></div>
-                <div className="chips">{c.t.map((t) => <span className="chip" key={t}>{t}</span>)}</div>
+                {c.fig}
               </div>
             ))}
           </div>
@@ -427,7 +435,7 @@ export function Site() {
 
       <footer className="foot">
         <div className="wrap">
-          <Backers label="Backed by" />
+          <LogoRow label="Built with talent from" items={TALENT} />
           <div className="foot-in">
             <span>AeroBin, est. 2025</span>
           </div>
