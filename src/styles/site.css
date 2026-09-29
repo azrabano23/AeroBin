@@ -388,3 +388,60 @@ h2.t {
 .fig-2 > div { display: flex; flex-direction: column; gap: 7px; }
 .fig-2 span { font-size: 12.5px; color: var(--mut); }
 .fig-2 b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ── the guess: the page's hook ─────────────────────────────────────── */
+
+.guess {
+  border: 1px solid var(--line); border-radius: var(--r); background: var(--card);
+  padding: clamp(26px, 4vw, 46px); display: flex; flex-direction: column;
+  gap: clamp(24px, 3vw, 34px);
+}
+.guess-q { display: flex; flex-direction: column; gap: 10px; }
+.guess-q h3 { font-size: clamp(24px, 3.4vw, 36px); font-weight: 500; letter-spacing: -.03em; margin: 0; line-height: 1.1; }
+.guess-q p { color: var(--mut); margin: 0; font-size: 15px; }
+
+.guess-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 680px) { .guess-row { grid-template-columns: 1fr; } }
+
+.guess-c {
+  font: inherit; text-align: left; background: var(--paper);
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 20px 18px 16px; display: flex; flex-direction: column;
+  align-items: center; gap: 14px; color: var(--ink);
+  transition: border-color .2s, background .2s, transform .25s cubic-bezier(.34,1.4,.64,1);
+}
+.guess-c:not(:disabled):hover { border-color: var(--ink); transform: translateY(-3px); }
+.guess-c.picked { border-color: var(--ink); background: var(--paper-2); }
+.guess-c.hot { border-color: #C0392B; }
+.guess-c:disabled { cursor: none; }
+.guess-art { width: 100%; max-width: 104px; height: auto; display: block; }
+
+.guess-lbl { display: flex; flex-direction: column; gap: 3px; text-align: center; }
+.guess-lbl b { font-size: 14.5px; font-weight: 600; }
+.guess-lbl span { font-size: 12.5px; color: var(--mut); }
+
+.guess-val {
+  font-family: var(--mono); display: flex; flex-direction: column;
+  align-items: center; gap: 2px; min-height: 40px; justify-content: center;
+}
+.guess-val .q { font-size: 26px; color: var(--line-2); font-weight: 500; }
+.guess-val span { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.guess-val i {
+  font-style: normal; font-size: 9.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--dim);
+}
+
+.guess-a {
+  border-top: 1px solid var(--line); padding-top: 22px;
+  display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;
+}
+.guess-a p { margin: 0; color: var(--mut); font-size: 15.5px; line-height: 1.6; max-width: 66ch; }
+.guess-a p b { color: var(--ink); font-weight: 500; }
+.guess-a:not(.on) p { color: var(--dim); font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.guess-reset {
+  font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--mut); background: transparent;
+  border: 1px solid var(--line-2); border-radius: var(--r-pill);
+  padding: 8px 15px; margin-left: auto; transition: color .18s, border-color .18s;
+}
+.guess-reset:hover { color: var(--ink); border-color: var(--ink); }

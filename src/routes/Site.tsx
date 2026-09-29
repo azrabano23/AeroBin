@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import '../styles/site.css'
 import { CityMap } from '../components/site/CityMap'
 import { FillCurve, StopDots, ContamBar, SavedArea } from '../components/site/Figures'
+import { Guess } from '../components/site/Guess'
 import icon from '../assets/logos/aerobin-icon.png'
 import rutgers from '../assets/logos/rutgers.png'
 import columbiaL from '../assets/logos/columbia.png'
@@ -294,7 +295,11 @@ export function Site() {
               visiting everything.
             </p>
           </div>
-          <div className="stats rise d1">
+          <div className="rise d1">
+            <Guess />
+          </div>
+
+          <div className="stats rise d2">
             <Stat n={200} suffix="B" k="Spent every year on waste management in the U.S." s="Figure under verification" />
             <Stat n={40} suffix="%" k="Of pickups happen at bins that are not even half full" s="Figure under verification" />
             <Stat n={100} suffix=" t" k="CO2 emitted per collection truck, per year" s="Figure under verification" />
