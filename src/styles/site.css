@@ -197,7 +197,14 @@ h2.t {
 
 .cm-canvas { position: relative; border-right: 1px solid var(--line); min-height: 460px; background: var(--paper-2); }
 @media (max-width: 900px) { .cm-canvas { border-right: 0; border-bottom: 1px solid var(--line); min-height: 380px; } }
-.cm-canvas .leaflet-container { width: 100%; height: 100%; background: var(--paper-2); font-family: var(--sans); }
+/* Leaflet needs a DEFINITE height. The parent only carries min-height, and
+   a child at height:100% against that can resolve to zero, which is the
+   classic blank-map bug. Pinning to the parent's box avoids it entirely. */
+.cm-canvas .leaflet-container {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  background: var(--paper-2); font-family: var(--sans); z-index: 0;
+}
 .cm-canvas .leaflet-control-attribution {
   font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,.82);
   color: var(--dim); border-radius: var(--r-pill) 0 0 0; padding: 2px 8px;
