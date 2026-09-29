@@ -445,3 +445,12 @@ h2.t {
   padding: 8px 15px; margin-left: auto; transition: color .18s, border-color .18s;
 }
 .guess-reset:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ── awards ─────────────────────────────────────────────────────────── */
+
+.awards { display: flex; flex-wrap: wrap; gap: 14px 36px; margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+.award { display: flex; align-items: center; gap: 12px; color: var(--grn); }
+.award svg { width: 24px; height: 24px; flex: none; }
+.award div { display: flex; flex-direction: column; gap: 1px; }
+.award b { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -.012em; }
+.award span { font-size: 13px; color: var(--mut); }

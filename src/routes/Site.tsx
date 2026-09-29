@@ -5,8 +5,9 @@ import { CityMap } from '../components/site/CityMap'
 import { FillCurve, StopDots, ContamBar, SavedArea } from '../components/site/Figures'
 import { Guess } from '../components/site/Guess'
 import icon from '../assets/logos/aerobin-icon.png'
-import rutgers from '../assets/logos/rutgers.png'
+import rutgers from '../assets/logos/rutgers-mark.png'
 import columbiaL from '../assets/logos/columbia.png'
+import qualcomm from '../assets/logos/qualcomm.png'
 import winlab from '../assets/logos/winlab.png'
 import nsfcss from '../assets/logos/nsf-css.png'
 import njeda from '../assets/logos/njeda.png'
@@ -150,16 +151,22 @@ const BIN_TYPES = [
   },
 ]
 
-const BACKED_BY: Array<[string, string]> = [[rutgers, 'Rutgers University']]
+const BACKED_BY: Array<[string, string] | string> = [
+  [rutgers, 'Rutgers University'],
+  'Verizon',
+  [qualcomm, 'Qualcomm'],
+]
 
 /* Real marks where the deck carried one, set wordmarks where it did not. */
 const TALENT: Array<[string, string] | string> = [
   'Google',
-  'Y Combinator',
   'NASA',
   'Goldman Sachs',
-  'Yale',
+  'Y Combinator',
   'MIT',
+  'IEEE',
+  'CCICADA',
+  'Verizon',
   [columbiaL, 'Columbia University'],
   [rutgers, 'Rutgers University'],
   [winlab, 'WINLAB'],
@@ -168,6 +175,11 @@ const TALENT: Array<[string, string] | string> = [
   [njeda, 'New Jersey EDA'],
   [njL, 'State of New Jersey'],
   [nec, 'NEC Labs America'],
+]
+
+const AWARDS: Array<[string, string]> = [
+  ['1st place, national', 'Verizon Smart Campus Competition'],
+  ['Winner', 'Rutgers Shark Tank university-wide ideation competition'],
 ]
 
 function LogoRow({ label, items }: { label: string; items: Array<[string, string] | string> }) {
@@ -281,6 +293,21 @@ export function Site() {
 
       <section className="wrap backed">
         <LogoRow label="Backed by" items={BACKED_BY} />
+        <div className="awards">
+          {AWARDS.map(([k, v]) => (
+            <div className="award" key={v}>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M8 3h8v6a4 4 0 0 1-8 0V3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M8 4.5H5.5a3 3 0 0 0 3 3M16 4.5H18.5a3 3 0 0 1-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M12 13v4M9 21h6M10.5 17h3l.6 4h-4.2l.6-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+              </svg>
+              <div>
+                <b>{k}</b>
+                <span>{v}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* ── problem ── */}
