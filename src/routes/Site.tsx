@@ -271,6 +271,7 @@ export function Site() {
 
       {/* ── hero ── */}
       <header className="wrap hero">
+        <div className="cat rise">The sensing layer for city waste</div>
         <div className="hero-mark rise">
           <img src={icon} alt="" aria-hidden />
           <span>AeroBin</span>
@@ -278,16 +279,22 @@ export function Site() {
         <h1 className="rise d1">We make trash <span className="g">talk.</span></h1>
         <div className="hero-grid rise d2">
           <p className="lede">
-            Collection trucks run on a fixed calendar, not on what is in the bin. AeroBin clips a
-            sensor onto the bins a campus already owns, so every route is built from{' '}
-            <b>real fill levels instead of a guess.</b>
+            Clip AeroBin onto any bin a campus already owns, indoor, outdoor, dumpster or
+            compactor. It reads how full the bin is and tells the truck where to go.
           </p>
           <div className="hero-cta">
             <a className="btn btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
             <a className="btn" href="#map">See a live campus</a>
           </div>
         </div>
-        <div className="rise d3" style={{ marginTop: 'clamp(36px,5vw,64px)' }} id="map">
+        <div className="stage rise d3" id="map">
+          <div className="stage-bg" aria-hidden>
+            <div className="stage-mos">
+              {Array.from({ length: 96 }, (_, i) => (
+                <i key={i} style={{ opacity: ((i * 37) % 11) / 16 }} />
+              ))}
+            </div>
+          </div>
           <CityMap />
         </div>
       </header>
@@ -373,14 +380,29 @@ export function Site() {
           </div>
           <div className="caps rise d1">
             {[
-              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, fig: <FillCurve /> },
-              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, fig: <StopDots /> },
-              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, fig: <ContamBar /> },
-              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, fig: <SavedArea /> },
+              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, fig: <FillCurve />, checks: ['fill level', 'continuous', 'per container'], tags: 'CAPACITY \u00B7 TREND \u00B7 THRESHOLD' },
+              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, fig: <StopDots />, checks: ['fill level', 'geography', 'crew hours'], tags: 'ROUTING \u00B7 DISPATCH \u00B7 DAILY' },
+              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, fig: <ContamBar />, checks: ['contamination', 'per stream', 'alerting'], tags: 'RECYCLING \u00B7 ORGANICS \u00B7 LANDFILL' },
+              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, fig: <SavedArea />, checks: ['trips avoided', 'fuel', 'crew hours'], tags: 'ROI \u00B7 ESG \u00B7 SLA' },
             ].map((c) => (
               <div className="cap" key={c.n}>
                 <div className="num">{c.n}</div>
-                <div><h3>{c.h}</h3><p>{c.p}</p></div>
+                <div>
+                  <h3>{c.h}</h3>
+                  <p>{c.p}</p>
+                  <ul className="checks">
+                    {c.checks.map((k) => (
+                      <li key={k}>
+                        <svg viewBox="0 0 20 20" fill="none" aria-hidden>
+                          <circle cx="10" cy="10" r="9" fill="var(--grn)" />
+                          <path d="M6 10.4l2.6 2.6L14 7.6" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {k}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="cap-tags">{c.tags}</div>
+                </div>
                 {c.fig}
               </div>
             ))}
@@ -456,25 +478,61 @@ export function Site() {
       </section>
 
       {/* ── close ── */}
-      <section className="close">
+      <section className="cta-block">
         <div className="wrap">
-          <h2 className="rise">We make trash <span className="g">talk.</span></h2>
-          <p className="rise d1">
-            If you build, buy or fund city infrastructure, we would like to show you the pilot.
+          <span className="cta-tag">Request a pilot</span>
+          <h2>Somewhere on your campus a bin is overflowing right now.</h2>
+          <p>
+            Tell us how many containers you run and where they are. You will get a straight answer
+            about whether AeroBin fits.
           </p>
-          <div className="hero-cta rise d2">
-            <a className="btn btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
+          <div className="hero-cta">
+            <a className="btn btn-1 on-green" href={CAL} target="_blank" rel="noreferrer">
+              Book a call &#8594;
+            </a>
             <a className="btn" href={`mailto:${CONTACT}`}>{CONTACT}</a>
-          </div>
-          <div className="src rise d3" style={{ marginTop: 22 }}>
-            Founder: <a href={`mailto:${FOUNDER}`}>{FOUNDER}</a>
           </div>
         </div>
       </section>
 
       <footer className="foot">
         <div className="wrap">
+          <div className="foot-cols">
+            <div className="foot-brand">
+              <span className="lock-up">
+                <span className="a">AeroBin</span>
+                <span className="b">We make trash talk.</span>
+              </span>
+              <p>
+                The sensing layer for city waste. A clip-on sensor for the bins a campus already
+                owns.
+              </p>
+            </div>
+            <div className="foot-col">
+              <h5>Product</h5>
+              <a href="#sensor">The sensor</a>
+              <a href="#map">Live campus map</a>
+              <a href="#dashboard">Dashboard</a>
+              <Link to="/dashboard">Open dashboard</Link>
+            </div>
+            <div className="foot-col">
+              <h5>Clips onto</h5>
+              <span>Indoor slim</span>
+              <span>Outdoor barrel</span>
+              <span>Dumpster</span>
+              <span>Compactor</span>
+            </div>
+            <div className="foot-col">
+              <h5>Company</h5>
+              <a href={CAL} target="_blank" rel="noreferrer">Book a call</a>
+              <a href={`mailto:${CONTACT}`}>Contact</a>
+              <a href={`mailto:${FOUNDER}`}>Founder</a>
+              <a href="#problem">The problem</a>
+            </div>
+          </div>
+
           <LogoRow label="Built with talent from" items={TALENT} />
+
           <div className="foot-in">
             <span>AeroBin, est. 2025</span>
           </div>
