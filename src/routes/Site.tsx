@@ -4,6 +4,7 @@ import '../styles/site.css'
 import { CityMap } from '../components/site/CityMap'
 import { FillCurve, StopDots, ContamBar, SavedArea } from '../components/site/Figures'
 import { Guess } from '../components/site/Guess'
+import { DashPeek } from '../components/site/DashPeek'
 import icon from '../assets/logos/aerobin-icon.png'
 import rutgers from '../assets/logos/rutgers-mark.png'
 import columbiaL from '../assets/logos/columbia.png'
@@ -315,11 +316,13 @@ export function Site() {
         <div className="wrap">
           <div className="head rise">
             <div className="eyebrow">01 / The problem</div>
-            <h2 className="t">Trucks run on a timer,<br />not on what is in the bin.</h2>
+            <h2 className="t">Cities are blind.<br /><span style={{ color: 'var(--grn)' }}>We give them vision.</span></h2>
             <p className="lede">
-              Every bin gets visited every few days whether it is full or empty. Nobody is being
-              careless. The system simply cannot see fill level, so it cannot do better than
-              visiting everything.
+              Collection runs on a calendar because there is nothing else to run it on. A city
+              cannot see which bins are full, which have turned, which are taking the wrong
+              material, or which corner just hosted three thousand people. So every bin gets
+              visited every few days, full or empty. Nobody is being careless. They are working
+              without instruments.
             </p>
           </div>
           <div className="rise d1">
@@ -396,7 +399,11 @@ export function Site() {
               lives: a live fleet map, the alerts that matter, and the savings case already made.
             </p>
           </div>
-          <div className="mods rise d1">
+          <div className="rise d1">
+            <DashPeek />
+          </div>
+
+          <div className="mods rise d2">
             {[
               ['Fleet map', 'Every sensor on the campus map, coloured by fill. Click through to any bin.'],
               ['Fill analytics', 'Fill curves per building and per stream, so patterns show up before complaints do.'],

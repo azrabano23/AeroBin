@@ -53,7 +53,7 @@ export function Guess() {
       <div className="guess-q">
         <span className="eyebrow">A quick one</span>
         <h3>Which of these needs a truck today?</h3>
-        <p>Same building, same morning, same three bins a crew would drive past.</p>
+        <p>Same morning, same campus. A crew driving past sees exactly what you see.</p>
       </div>
 
       <div className="guess-row">
@@ -91,9 +91,10 @@ export function Guess() {
         {reveal ? (
           <p>
             {right ? <b>Right, but you had a one in three chance.</b> : <b>It was Bin {answer.id}.</b>}{' '}
-            Nothing on the outside of a bin tells you what is inside it. A crew on a fixed route
-            drives past all three and empties all three, because guessing is the only option they
-            have. <b>That is the entire problem.</b>
+            Nothing on the outside of a bin tells you what is inside it. Not how full it is, not
+            how rancid it has gone, not whether the wrong thing went in, not what is happening in
+            that part of campus this week. So the crew empties all three, because guessing is the
+            only option they have. <b>Cities are blind. We give them vision.</b>
           </p>
         ) : (
           <p>Pick one.</p>
