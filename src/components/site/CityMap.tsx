@@ -135,13 +135,13 @@ export function CityMap() {
             center={centre}
             zoom={c.zoom}
             scrollWheelZoom={false}
-            zoomControl={false}
+            zoomControl
             attributionControl
           >
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-              attribution='&copy; OpenStreetMap contributors &copy; CARTO'
-              maxZoom={20}
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              maxZoom={19}
               eventHandlers={{ tileerror: () => setTiles('blocked') }}
             />
             <Recenter bins={c.bins} zoom={c.zoom} />

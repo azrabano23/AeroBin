@@ -2,8 +2,22 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/site.css'
 import { CityMap } from '../components/site/CityMap'
+import icon from '../assets/logos/aerobin-icon.png'
+import rutgers from '../assets/logos/rutgers.png'
+import columbiaL from '../assets/logos/columbia.png'
+import berkeleyL from '../assets/logos/berkeley.png'
+import winlab from '../assets/logos/winlab.png'
+import nsfcss from '../assets/logos/nsf-css.png'
+import njeda from '../assets/logos/njeda.png'
+import nycedc from '../assets/logos/nycedc.png'
+import nec from '../assets/logos/nec.png'
+import middlesex from '../assets/logos/middlesex.png'
+import fau from '../assets/logos/fau.png'
+import njL from '../assets/logos/nj.png'
 
-const CONTACT = 'hello@aerobin.io'
+const CAL = 'https://calendar.app.google/rJh5jvabPLHewpj18'
+const CONTACT = 'aerobin.contact@gmail.com'
+const FOUNDER = 'azrabano.work@gmail.com'
 
 /* ── cursor: a bin that fills as you read, lid opens on anything live ─── */
 
@@ -137,7 +151,32 @@ const BIN_TYPES = [
   },
 ]
 
-const BACKERS = ['Rutgers', 'Columbia', 'WINLAB', 'UC Berkeley', 'NSF', 'Verizon', 'NJEDA', 'NYCEDC', 'NEC Labs', 'Middlesex County', 'Center for Smart Streetscapes', 'Florida Atlantic']
+const BACKERS: Array<[string, string]> = [
+  [rutgers, 'Rutgers University'],
+  [columbiaL, 'Columbia University'],
+  [berkeleyL, 'UC Berkeley'],
+  [winlab, 'WINLAB'],
+  [nsfcss, 'NSF Center for Smart Streetscapes'],
+  [njeda, 'New Jersey EDA'],
+  [nycedc, 'NYC EDC'],
+  [nec, 'NEC Labs America'],
+  [middlesex, 'Middlesex County NJ'],
+  [fau, 'Florida Atlantic University'],
+  [njL, 'State of New Jersey'],
+]
+
+function Backers({ label }: { label: string }) {
+  return (
+    <>
+      <div className="backed-l">{label}</div>
+      <div className="backed-g">
+        {BACKERS.map(([src, name]) => (
+          <img key={name} src={src} alt={name} title={name} />
+        ))}
+      </div>
+    </>
+  )
+}
 
 function Stat({ n, suffix, k, s }: { n: number; suffix: string; k: string; s: string }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -204,13 +243,16 @@ export function Site() {
             <a href="#map">Map</a>
             <a href="#dashboard">Dashboard</a>
           </div>
-          <a className="btn btn-sm btn-1" href={`mailto:${CONTACT}`}>Request a pilot</a>
+          <a className="btn btn-sm btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
         </div>
       </nav>
 
       {/* ── hero ── */}
       <header className="wrap hero">
-        <div className="boot rise"><span className="dot" />Smart waste infrastructure</div>
+        <div className="hero-mark rise">
+          <img src={icon} alt="" aria-hidden />
+          <span>AeroBin</span>
+        </div>
         <h1 className="rise d1">We make trash <span className="g">talk.</span></h1>
         <div className="hero-grid rise d2">
           <p className="lede">
@@ -219,8 +261,8 @@ export function Site() {
             <b>real fill levels instead of a guess.</b>
           </p>
           <div className="hero-cta">
-            <a className="btn btn-1" href="#map">See a live campus</a>
-            <a className="btn" href="#sensor">How it works</a>
+            <a className="btn btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
+            <a className="btn" href="#map">See a live campus</a>
           </div>
         </div>
         <div className="rise d3" style={{ marginTop: 'clamp(36px,5vw,64px)' }} id="map">
@@ -229,8 +271,7 @@ export function Site() {
       </header>
 
       <section className="wrap backed">
-        <div className="backed-l">Backed by</div>
-        <div className="backed-g">{BACKERS.map((x) => <span key={x}>{x}</span>)}</div>
+        <Backers label="Backed by" />
       </section>
 
       {/* ── problem ── */}
@@ -292,7 +333,7 @@ export function Site() {
               { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, t: ['fill level', 'continuous', 'per bin'] },
               { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, t: ['routing', 'daily', 'dispatch'] },
               { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, t: ['contamination', 'recycling', 'alerts'] },
-              { n: '04', h: 'What did we stop paying for?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, t: ['roi', 'esg reporting', 'sla'] },
+              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, t: ['roi', 'esg reporting', 'sla'] },
             ].map((c) => (
               <div className="cap" key={c.n}>
                 <div className="num">{c.n}</div>
@@ -335,22 +376,23 @@ export function Site() {
         </div>
       </section>
 
-      {/* ── path ── */}
+      {/* ── where it runs ── */}
       <section className="sec">
         <div className="wrap">
           <div className="head rise">
-            <div className="eyebrow">05 / The path</div>
-            <h2 className="t">Land one campus.<br />Then the city around it.</h2>
+            <div className="eyebrow">05 / Where it runs</div>
+            <h2 className="t">We started on college campuses.</h2>
             <p className="lede">
-              A closed campus first: contained geography, one facilities decision maker, a real
-              sustainability mandate. Prove the savings there, then widen the ring.
+              A campus is the cleanest place to prove this. Contained geography, one facilities
+              decision maker, a real sustainability mandate, and enough bins that the routing
+              actually matters. What works there is the same system a city runs.
             </p>
           </div>
           <div className="path rise d1">
             {[
               { st: 'In progress', now: true, h: 'Columbia University', p: 'Closed campus. Controlled deployment, instrumented from the first day.' },
               { st: 'Next', now: false, h: 'Open campus', p: 'Public bins, real foot traffic, messier data and harder routing.' },
-              { st: 'Then', now: false, h: 'City integration', p: 'The same sensors with a municipal fleet behind them.' },
+              { st: 'Then', now: false, h: 'Municipal fleet', p: 'The same sensors with a city collection fleet behind them.' },
             ].map((s) => (
               <div className={`step${s.now ? ' now' : ''}`} key={s.h}>
                 <div className="st"><b />{s.st}</div>
@@ -374,14 +416,21 @@ export function Site() {
             If you build, buy or fund city infrastructure, we would like to show you the pilot.
           </p>
           <div className="hero-cta rise d2">
-            <a className="btn btn-1" href={`mailto:${CONTACT}`}>Request a pilot</a>
+            <a className="btn btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
+            <a className="btn" href={`mailto:${CONTACT}`}>{CONTACT}</a>
+          </div>
+          <div className="src rise d3" style={{ marginTop: 22 }}>
+            Founder: <a href={`mailto:${FOUNDER}`}>{FOUNDER}</a>
           </div>
         </div>
       </section>
 
       <footer className="foot">
-        <div className="wrap foot-in">
-          <span>AeroBin, est. 2025</span>
+        <div className="wrap">
+          <Backers label="Backed by" />
+          <div className="foot-in">
+            <span>AeroBin, est. 2025</span>
+          </div>
         </div>
       </footer>
     </div>
