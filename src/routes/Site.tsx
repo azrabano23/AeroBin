@@ -5,6 +5,11 @@ import { CityMap } from '../components/site/CityMap'
 import { FillCurve, StopDots, ContamBar, SavedArea } from '../components/site/Figures'
 import { Guess } from '../components/site/Guess'
 import { DashPeek } from '../components/site/DashPeek'
+import { Swipe } from '../components/site/Swipe'
+import c01 from '../assets/caps/c01.png'
+import c02 from '../assets/caps/c02.png'
+import c03 from '../assets/caps/c03.png'
+import c04 from '../assets/caps/c04.png'
 import icon from '../assets/logos/aerobin-icon.png'
 import rutgers from '../assets/logos/rutgers-mark.png'
 import columbiaL from '../assets/logos/columbia.png'
@@ -336,7 +341,15 @@ export function Site() {
             <Guess />
           </div>
 
-          <div className="stats rise d2">
+          <div className="rise d2">
+            <div className="backed-l">The same forty bins, the same morning</div>
+            <Swipe />
+            <div className="src" style={{ marginTop: 12 }}>
+              Drag the handle. Real Columbia fleet coordinates, simulated fill levels.
+            </div>
+          </div>
+
+          <div className="stats rise d3">
             <Stat n={200} suffix="B" k="Spent every year on waste management in the U.S." s="Figure under verification" />
             <Stat n={40} suffix="%" k="Of pickups happen at bins that are not even half full" s="Figure under verification" />
             <Stat n={100} suffix=" t" k="CO2 emitted per collection truck, per year" s="Figure under verification" />
@@ -380,10 +393,10 @@ export function Site() {
           </div>
           <div className="caps rise d1">
             {[
-              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, fig: <FillCurve />, checks: ['fill level', 'continuous', 'per container'], tags: 'CAPACITY \u00B7 TREND \u00B7 THRESHOLD' },
-              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, fig: <StopDots />, checks: ['fill level', 'geography', 'crew hours'], tags: 'ROUTING \u00B7 DISPATCH \u00B7 DAILY' },
-              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, fig: <ContamBar />, checks: ['contamination', 'per stream', 'alerting'], tags: 'RECYCLING \u00B7 ORGANICS \u00B7 LANDFILL' },
-              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, fig: <SavedArea />, checks: ['trips avoided', 'fuel', 'crew hours'], tags: 'ROI \u00B7 ESG \u00B7 SLA' },
+              { n: '01', h: 'How full is that bin, right now?', p: <>Capacity read continuously, not inferred from a collection log. <b>Every bin, every hour.</b></>, shot: c01, fig: <FillCurve />, checks: ['fill level', 'continuous', 'per container'], tags: 'CAPACITY \u00B7 TREND \u00B7 THRESHOLD' },
+              { n: '02', h: 'Which bins need a truck today?', p: <>The route is rebuilt each morning from live fill, so a crew drives a <b>shorter run than the calendar</b> would have given them.</>, shot: c02, fig: <StopDots />, checks: ['fill level', 'geography', 'crew hours'], tags: 'ROUTING \u00B7 DISPATCH \u00B7 DAILY' },
+              { n: '03', h: 'Did the wrong thing go in?', p: <>Contamination gets flagged at the bin instead of at the sorting facility, where it costs the most to find.</>, shot: c03, fig: <ContamBar />, checks: ['contamination', 'per stream', 'alerting'], tags: 'RECYCLING \u00B7 ORGANICS \u00B7 LANDFILL' },
+              { n: '04', h: 'What is this actually saving?', p: <>Every skipped trip is logged against the old fixed schedule and costed, so the savings case is <b>already written when procurement asks.</b></>, shot: c04, fig: <SavedArea />, checks: ['trips avoided', 'fuel', 'crew hours'], tags: 'ROI \u00B7 ESG \u00B7 SLA' },
             ].map((c) => (
               <div className="cap" key={c.n}>
                 <div className="num">{c.n}</div>
@@ -403,7 +416,10 @@ export function Site() {
                   </ul>
                   <div className="cap-tags">{c.tags}</div>
                 </div>
-                {c.fig}
+                <div className="cap-vis">
+                  <img src={c.shot} alt="" aria-hidden loading="lazy" />
+                  {c.fig}
+                </div>
               </div>
             ))}
           </div>
