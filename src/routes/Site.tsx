@@ -1,492 +1,622 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/site.css'
+import cad from '../assets/site/cad.png'
+import { CityMap } from '../components/site/CityMap'
 
-const CONTACT_EMAIL = 'azrabano.work@gmail.com'
-const REPO = 'https://github.com/azrabano23/AeroBin'
-const ENGINE = 'https://github.com/azrabano23/aerobin-routing'
+const EMAIL = 'azrabano.work@gmail.com'
 
-/* ── ascii ─────────────────────────────────────────────────────────────── */
+/* ── the cursor is a bin.
+      It fills as you read down the page, and its lid flips open over
+      anything clickable. By the footer you have filled it.            */
 
-const WORDMARK = [
-  ' █████  ███████ ██████   ██████  ██████  ██ ███    ██',
-  '██   ██ ██      ██   ██ ██    ██ ██   ██ ██ ████   ██',
-  '███████ █████   ██████  ██    ██ ██████  ██ ██ ██  ██',
-  '██   ██ ██      ██   ██ ██    ██ ██   ██ ██ ██  ██ ██',
-  '██   ██ ███████ ██   ██  ██████  ██████  ██ ██   ████',
-].join('\n')
-
-const SCHEDULE = `           MON   TUE   WED   THU   FRI   SAT   SUN
-  truck    [x]   [x]   [x]   [x]   [x]   [x]   [x]    7 stops
-  full      .     .     .     .    [!]    .     .     1 full
-           ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
-           six trips to bins nobody needed emptied`
-
-const SCHEDULE_SM = `        M   T   W   T   F   S   S
- truck [x] [x] [x] [x] [x] [x] [x]
- full   .   .   .   .  [!]  .   .
-       ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
- 7 stops, 1 bin actually full`
-
-const PIPELINE = `  ╔═══════════╗   ╔═══════════╗   ╔═══════════╗   ╔═══════════╗
-  ║  SENSOR   ║──>║ REDCAP 5G ║──>║  ROUTING  ║──>║ DASHBOARD ║
-  ║  ~$100    ║   ║  uplink   ║   ║  ENGINE   ║   ║  + crew   ║
-  ╚═══════════╝   ╚═══════════╝   ╚═══════════╝   ╚═══════════╝
-   clips onto      tells you       picks the       shows the
-   your bin        it's full       stops           whole fleet`
-
-const PIPELINE_SM = ` ╔═══════════╗
- ║  SENSOR   ║  clips on, ~$100
- ╚═════╤═════╝
- ╔═════▼═════╗
- ║ REDCAP 5G ║  says it's full
- ╚═════╤═════╝
- ╔═════▼═════╗
- ║  ROUTING  ║  picks the stops
- ╚═════╤═════╝
- ╔═════▼═════╗
- ║ DASHBOARD ║  crew sees it
- ╚═══════════╝`
-
-const STREET = `   EVERY BIN, EVERY TIME              ONLY THE FULL ONES
-   ┌──┬──┬──┬──┬──┬──┐               ┌──┬──┬──┬──┬──┬──┐
-   │▓▓│░░│░░│▓▓│░░│░░│               │▓▓│░░│░░│▓▓│░░│░░│
-   └┬─┴┬─┴┬─┴┬─┴┬─┴┬─┘               └┬─┴──┴──┴┬─┴──┴──┘
-    ●  ●  ●  ●  ●  ●                  ●        ●
-    six stops                         two stops
-
-   ▓▓ full        ░░ not full        ● truck stops here`
-
-const STREET_SM = ` EVERY BIN, EVERY TIME
- ┌──┬──┬──┬──┬──┬──┐
- │▓▓│░░│░░│▓▓│░░│░░│
- └┬─┴┬─┴┬─┴┬─┴┬─┴┬─┘
-  ●  ●  ●  ●  ●  ●
-  six stops
-
- ONLY THE FULL ONES
- ┌──┬──┬──┬──┬──┬──┐
- │▓▓│░░│░░│▓▓│░░│░░│
- └┬─┴──┴──┴┬─┴──┴──┘
-  ●        ●
-  two stops
-
- ▓▓ full   ░░ not full`
-
-const BIN = `        .-.
-     ((  ●  ))   ~ ~ ~   redcap 5g
-        '-'
-    ┌───────────┐
-    │  AEROBIN  │    fill ........... 88%
-    ├───────────┤    contamination ... clear
-    │███████████│    verdict ......... COLLECT
-    │███████████│
-    │███████████│
-    │░░░░░░░░░░░│
-    └───────────┘`
-
-const BIN_SM = `      .-.
-   ((  ●  ))  ~ ~ ~
-      '-'
-  ┌───────────┐
-  │  AEROBIN  │
-  ├───────────┤
-  │███████████│
-  │███████████│
-  │███████████│
-  │░░░░░░░░░░░│
-  └───────────┘
-
-  fill .......... 88%
-  contamination . clear
-  verdict ....... COLLECT`
-
-const TALK = [
-  '████████ ██████   █████  ███████ ██   ██ ',
-  '   ██    ██   ██ ██   ██ ██      ██   ██ ',
-  '   ██    ██████  ███████ ███████ ███████ ',
-  '   ██    ██   ██ ██   ██      ██ ██   ██ ',
-  '   ██    ██   ██ ██   ██ ███████ ██   ██ ',
-  '████████  █████  ██      ██   ██ ',
-  '   ██    ██   ██ ██      ██  ██  ',
-  '   ██    ███████ ██      █████   ',
-  '   ██    ██   ██ ██      ██  ██  ',
-  '   ██    ██   ██ ███████ ██   ██ ',
-].join('\n')
-
-function bar(pct: number, width = 44, fill = '█', empty = '·') {
-  const n = Math.max(pct > 0 ? 1 : 0, Math.round((pct / 100) * width))
-  return fill.repeat(n) + empty.repeat(Math.max(0, width - n))
-}
-
-/* [ wide label, narrow label, percent, readout ] */
-const SERIES: Array<[string, string, number, string]> = [
-  ['wasteful pickups, fixed schedule', 'wasteful, fixed schedule', 87, '87%'],
-  ['wasteful pickups, aerobin', 'wasteful, aerobin', 0.5, '0.5%'],
-  ['', '', -1, ''],
-  ['servicing events, before', 'servicing, before', 100, '100'],
-  ['servicing events, after', 'servicing, after', 30, '30  (-70%)'],
-]
-
-function numbersChart(narrow: boolean) {
-  if (!narrow) {
-    return SERIES.map(([label, , pct, val]) =>
-      pct < 0 ? '' : `  ${label.padEnd(34)}${bar(pct, 44)}  ${val}`,
-    ).join('\n')
-  }
-  return SERIES.map(([, label, pct, val]) =>
-    pct < 0 ? '' : `  ${label}\n  ${bar(pct, 18)}  ${val}`,
-  ).join('\n')
-}
-
-/* ── viewport ──────────────────────────────────────────────────────────── */
-
-function useNarrow(query = '(max-width: 720px)') {
-  const [narrow, setNarrow] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(query).matches,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia(query)
-    const on = () => setNarrow(mq.matches)
-    mq.addEventListener('change', on)
-    on()
-    return () => mq.removeEventListener('change', on)
-  }, [query])
-  return narrow
-}
-
-/* ── simulated telemetry ───────────────────────────────────────────────── */
-
-type Row = { id: string; site: string; fill: number }
-
-const SEED: Row[] = [
-  { id: 'BIN-0142', site: 'quad-north', fill: 52 },
-  { id: 'BIN-0187', site: 'dining-hall', fill: 88 },
-  { id: 'BIN-0203', site: 'library-plaza', fill: 19 },
-  { id: 'BIN-0231', site: 'rec-center', fill: 74 },
-]
-
-function Telemetry() {
-  const [rows, setRows] = useState(SEED)
-  const narrow = useNarrow()
+function BinCursor() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [p, setP] = useState(0)
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setRows((prev) =>
-        prev.map((r) => {
-          const next = r.fill + Math.random() * 2.2 - 0.55
-          return { ...r, fill: next > 99 ? 6 : Math.max(2, next) }
-        }),
-      )
-    }, 1600)
-    return () => clearInterval(t)
+    const el = ref.current
+    if (!el || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    let raf = 0
+    let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty
+    const move = (e: PointerEvent) => {
+      tx = e.clientX; ty = e.clientY
+      const t = e.target as Element | null
+      el.classList.toggle('lock', !!t?.closest('a, button, .demo, .mod, .hw-img'))
+      el.classList.remove('hidden')
+    }
+    const out = () => el.classList.add('hidden')
+    const tick = () => {
+      x += (tx - x) * 0.19; y += (ty - y) * 0.19
+      el.style.transform = `translate3d(${x}px,${y}px,0)`
+      raf = requestAnimationFrame(tick)
+    }
+    const scroll = () => {
+      const h = document.documentElement.scrollHeight - innerHeight
+      setP(h > 0 ? Math.min(1, scrollY / h) : 0)
+    }
+    addEventListener('pointermove', move, { passive: true })
+    addEventListener('scroll', scroll, { passive: true })
+    document.addEventListener('pointerleave', out)
+    scroll(); tick()
+    return () => {
+      removeEventListener('pointermove', move)
+      removeEventListener('scroll', scroll)
+      document.removeEventListener('pointerleave', out)
+      cancelAnimationFrame(raf)
+    }
   }, [])
 
-  const text = useMemo(() => {
-    const nameW = narrow ? 14 : 15
-    const barW = narrow ? 8 : 16
-    const rule = narrow ? 34 : 56
-    const body = rows
-      .map((r) => {
-        const f = Math.round(r.fill)
-        const verdict = f >= 80 ? 'COLLECT' : f >= 65 ? 'watch  ' : 'skip   '
-        const id = narrow ? '' : `${r.id}  `
-        return `  ${id}${r.site.padEnd(nameW)}[${bar(f, barW, '█', '░')}] ${String(f).padStart(3)}%  ${verdict}`
-      })
-      .join('\n')
-    const collect = rows.filter((r) => r.fill >= 80).length
-    return [
-      '  $ aerobin tail --demo',
-      '  ' + '─'.repeat(rule),
-      body,
-      '  ' + '─'.repeat(rule),
-      `  route: ${collect} stop${collect === 1 ? '' : 's'} · ${rows.length - collect} skipped`,
-    ].join('\n')
-  }, [rows, narrow])
+  /* waste line: rises from the base of the bin as the page is consumed */
+  const inner = { top: 13.5, bot: 30.5 }
+  const h = (inner.bot - inner.top) * p
+  const full = p > 0.85
 
   return (
-    <div className="ascii-box hero-term">
-      <pre className="ascii">{text}</pre>
-      <div className="caption">SIMULATED — SAMPLE DATA, NOT A LIVE DEPLOYMENT</div>
+    <div className="bin-cur hidden" ref={ref} aria-hidden>
+      <svg viewBox="0 0 34 38" fill="none">
+        {/* halo that pops on interactive targets */}
+        <circle className="ring" cx="17" cy="21" r="16" stroke="var(--hv)" strokeWidth="1" opacity=".5" />
+
+        {/* contents */}
+        <rect
+          className="fill"
+          x="8.6" width="16.8"
+          y={inner.bot - h} height={h}
+          rx="1.4"
+          fill={full ? 'var(--orange)' : 'var(--hv)'}
+          opacity=".92"
+        />
+
+        {/* body */}
+        <path
+          className="body"
+          d="M7.6 12.2h18.8l-1.5 19.1a2.6 2.6 0 0 1-2.6 2.4H11.7a2.6 2.6 0 0 1-2.6-2.4L7.6 12.2Z"
+          stroke="var(--paint)" strokeWidth="1.7" strokeLinejoin="round"
+        />
+        <path d="M13.6 17.5v10M20.4 17.5v10" stroke="var(--paint)" strokeWidth="1.2" strokeLinecap="round" opacity=".45" />
+
+        {/* lid — hinges open on hover */}
+        <g className="lid">
+          <path d="M5.4 11.2h23.2" stroke="var(--paint)" strokeWidth="2.1" strokeLinecap="round" />
+          <path d="M13.6 11.2V8.4a1.5 1.5 0 0 1 1.5-1.5h3.8a1.5 1.5 0 0 1 1.5 1.5v2.8" stroke="var(--paint)" strokeWidth="1.6" strokeLinejoin="round" />
+        </g>
+      </svg>
     </div>
   )
 }
 
-/* ── section helper ────────────────────────────────────────────────────── */
+/* ── scroll reveal (content is visible without JS; this only animates) ─── */
 
-function Label({ n, children }: { n: string; children: React.ReactNode }) {
+function useReveal() {
+  useEffect(() => {
+    const root = document.querySelector('.site')
+    if (!root) return
+    root.classList.add('js')
+    const els = root.querySelectorAll('.rise')
+    const io = new IntersectionObserver(
+      (es) =>
+        es.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in')
+            io.unobserve(e.target)
+          }
+        }),
+      { rootMargin: '0px 0px -6% 0px', threshold: 0.04 },
+    )
+    els.forEach((el) => io.observe(el))
+    // anything already on screen at load reveals immediately
+    requestAnimationFrame(() => els.forEach((el) => {
+      const r = el.getBoundingClientRect()
+      if (r.top < innerHeight) el.classList.add('in')
+    }))
+    return () => io.disconnect()
+  }, [])
+}
+
+/* ── count-up ──────────────────────────────────────────────────────────── */
+
+function useCountUp(target: number, run: boolean, ms = 1100) {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    if (!run) return
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setV(target)
+    let raf = 0
+    const t0 = performance.now()
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms)
+      setV(target * (1 - Math.pow(1 - p, 3)))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, run, ms])
+  return v
+}
+
+function Ticker() {
+  const items = [
+    ['AB-021', 'dining hall', '89%', 'COLLECT'],
+    ['AB-118', 'south lot', '94%', 'COLLECT'],
+    ['AB-033', 'library plaza', '22%', 'skip'],
+    ['AB-090', 'dorm row a', '83%', 'COLLECT'],
+    ['AB-125', 'greenhouse', '12%', 'skip'],
+    ['AB-061', 'rec center', '91%', 'COLLECT'],
+    ['AB-081', 'arts building', '17%', 'skip'],
+    ['AB-103', 'bus loop', '73%', 'watch'],
+  ]
+  const row = [...items, ...items]
   return (
-    <div className="sec-label">
-      <i>[{n}]</i>
-      {children}
+    <div className="tick" aria-hidden>
+      <div className="tick-in">
+        {row.map(([id, place, pct, verdict], i) => (
+          <span key={i}>
+            <i>{id}</i>
+            {place}
+            <b>{pct}</b>
+            <i>{verdict}</i>
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
 
-/* ── page ──────────────────────────────────────────────────────────────── */
+/* ── the page ──────────────────────────────────────────────────────────── */
+
+const BACKERS = [
+  'Rutgers', 'Columbia', 'WINLAB', 'UC Berkeley', 'NSF', 'Verizon',
+  'NJEDA', 'NYCEDC', 'NEC Labs', 'Middlesex County', 'Center for Smart Streetscapes',
+  'Florida Atlantic',
+]
+
+function Stat({ n, suffix, k, src }: { n: number; suffix: string; k: string; src: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [run, setRun] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (e) => e[0].isIntersecting && (setRun(true), io.disconnect()),
+      { threshold: 0.3 },
+    )
+    io.observe(el)
+    if (el.getBoundingClientRect().top < innerHeight) setRun(true)
+    /* belt and braces: if the observer never fires (odd embed, no scroll)
+       the number must still land on its real value rather than sit at 0 */
+    const t = setTimeout(() => setRun(true), 1600)
+    return () => {
+      io.disconnect()
+      clearTimeout(t)
+    }
+  }, [])
+  const v = useCountUp(n, run)
+  return (
+    <div className="stat" ref={ref}>
+      <div className="n">
+        {Math.round(v)}
+        {suffix}
+      </div>
+      <div className="k">{k}</div>
+      <div className="s">{src}</div>
+    </div>
+  )
+}
 
 export function Site() {
-  const narrow = useNarrow()
+  useReveal()
+  useEffect(() => {
+    const nav = document.querySelector('.nav')
+    if (!nav) return
+    const on = () => nav.classList.toggle('stuck', scrollY > 40)
+    addEventListener('scroll', on, { passive: true })
+    on()
+    return () => removeEventListener('scroll', on)
+  }, [])
 
   return (
     <div className="site">
+      <BinCursor />
+
       <nav className="nav">
         <div className="wrap nav-in">
-          <div className="nav-mark">
-            AEROBIN<span>.</span>
-          </div>
+          <Link to="/" className="mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M5 8h14l-1.2 12.5a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4L5 8Z" stroke="var(--acc)" strokeWidth="1.5" />
+              <path d="M12 5.5V3" stroke="var(--acc)" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M9.2 3.4a4 4 0 0 1 5.6 0M7 1.6a7 7 0 0 1 10 0" stroke="var(--acc)" strokeWidth="1.3" strokeLinecap="round" opacity=".8" />
+            </svg>
+            <span className="lock-up">
+              <span className="a">AEROBIN</span>
+              <span className="b">we make trash talk</span>
+            </span>
+          </Link>
           <div className="nav-links">
             <a href="#problem">problem</a>
-            <a href="#how">how</a>
-            <a href="#numbers">numbers</a>
-            <a href="#model">model</a>
+            <a href="#product">product</a>
+            <a href="#hardware">hardware</a>
+            <a href="#platform">platform</a>
+            <a href="#path">path</a>
           </div>
-          <Link to="/dashboard" className="btn btn-sm btn-primary">
-            dashboard →
-          </Link>
+          <a className="btn btn-sm btn-1" href={`mailto:${EMAIL}`}>
+            Talk to us
+          </a>
         </div>
       </nav>
 
       {/* ── hero ── */}
-      <header className="wrap hero">
-        <div className="hero-kicker">
-          <i>●</i> smart-waste infrastructure
+      <header className="hero">
+        <div className="wrap">
+          <div className="boot rise">
+            <span className="dot" />
+            smart-waste infrastructure · pilot stage · new brunswick, nj
+          </div>
+
+          <h1 className="rise d1">
+            We make trash <span className="mark-hi">talk.</span>
+          </h1>
+
+          <div className="hero-grid rise d2">
+            <p className="lede">
+              A clip-on sensor that tells operations exactly when a bin needs attention — so
+              collection trucks stop running on a timer and start running on <b>what's actually
+              in the bin.</b>
+            </p>
+            <div className="hero-cta">
+              <a className="btn btn-1" href="#product">
+                See it working
+              </a>
+              <a className="btn" href={`mailto:${EMAIL}`}>
+                Talk to us
+              </a>
+            </div>
+          </div>
+
+          <div className="rise d3" style={{ marginTop: 'clamp(38px,5vw,64px)' }}>
+            <CityMap />
+          </div>
         </div>
 
-        <pre className="wordmark">{WORDMARK}</pre>
-
-        <h1>
-          We make trash talk.<span className="cursor" />
-        </h1>
-
-        <p>
-          A <b>~$100 clip-on sensor</b> tells you which bins are actually full, over{' '}
-          <b>Verizon RedCap 5G</b>. Crews skip the rest.
-        </p>
-
-        <div className="hero-cta">
-          <Link to="/dashboard" className="btn btn-primary">
-            [ see the dashboard ]
-          </Link>
-          <a className="btn" href="#numbers">
-            [ the numbers ]
-          </a>
-        </div>
-
-        <Telemetry />
+        <div className="hazard" style={{ marginTop: 'clamp(28px,4vw,44px)' }} />
+        <Ticker />
       </header>
 
-      {/* ── proof ── */}
-      <section className="proof">
-        <div>
-          <dt>Competition</dt>
-          <dd>
-            <b>1st, national</b> — Verizon Smart Campus
-          </dd>
-        </div>
-        <div>
-          <dt>Discovery</dt>
-          <dd>
-            <b>NSF I-Corps</b> — 50+ interviews
-          </dd>
-        </div>
-        <div>
-          <dt>Advisors</dt>
-          <dd>
-            <b>Rutgers</b> · NEC Labs · NYC/NJ EDA
-          </dd>
+      {/* ── backed by ── */}
+      <section className="wrap backed">
+        <div className="backed-l">Backed by</div>
+        <div className="backed-g">
+          {BACKERS.map((x) => (
+            <span key={x}>{x}</span>
+          ))}
         </div>
       </section>
 
       {/* ── 01 problem ── */}
       <section className="sec" id="problem">
+        <span className="ghost" aria-hidden>01</span>
         <div className="wrap">
-          <div className="sec-head">
-            <Label n="01">the problem</Label>
-            <h2 className="sec-title">Trucks run on a timer.</h2>
-            <p className="sec-lede">
-              Collection — not disposal — is the largest line item in municipal waste budgets (
-              <a href="https://datatopics.worldbank.org/what-a-waste/" target="_blank" rel="noreferrer">
-                World Bank, What a Waste 2.0
-              </a>
-              ). Most of those stops are at bins that aren't full. The system can't see fill level,
-              so it can't do better than visiting everything.
+          <div className="head rise">
+            <div className="eyebrow">
+              <i>01</i> the problem
+            </div>
+            <h2 className="t">
+              What's the one thing in every room
+              <br />
+              you walked into today?
+            </h2>
+            <p className="lede">
+              Trash. The most ignored object in the building, emptied on a schedule that was set
+              years ago and never checked against reality. <b>Waste systems are blind.</b> They
+              cannot see how full a bin is, so they cannot do better than visiting everything.
             </p>
           </div>
 
-          <div className="ascii-box">
-            <pre className="ascii ascii-fg">{narrow ? SCHEDULE_SM : SCHEDULE}</pre>
+          <div className="stats rise d1">
+            <Stat
+              n={200}
+              suffix="B"
+              k="Spent every year on waste management in the U.S."
+              src="Figure under verification — source pending"
+            />
+            <Stat
+              n={40}
+              suffix="%"
+              k="Of pickups happen at bins that aren't even half full"
+              src="Figure under verification — source pending"
+            />
+            <Stat
+              n={100}
+              suffix=" t"
+              k="CO₂ emitted per collection truck, per year"
+              src="Figure under verification — source pending"
+            />
           </div>
         </div>
       </section>
 
-      {/* ── 02 how ── */}
-      <section className="sec" id="how">
+      {/* ── 02 product ── */}
+      <section className="sec" id="product">
+        <span className="ghost" aria-hidden>02</span>
         <div className="wrap">
-          <div className="sec-head">
-            <Label n="02">how it works</Label>
-            <h2 className="sec-title">Clip it on. It talks.</h2>
-          </div>
-
-          <div className="ascii-box">
-            <pre className="ascii">{narrow ? PIPELINE_SM : PIPELINE}</pre>
-          </div>
-
-          <ul className="list steps">
-            <li>
-              <b>Sensor</b> — ~$100, clips onto a bin you already own. Reads fill and contamination.
-            </li>
-            <li>
-              <b>RedCap 5G</b> — cellular uplink, so no new bins and no new network.
-            </li>
-            <li>
-              <b>Routing engine</b> — decides which bins to collect and in what order. Lives in{' '}
-              <a href={ENGINE} target="_blank" rel="noreferrer">
-                its own tested repo
-              </a>
-              .
-            </li>
-            <li>
-              <b>Dashboard</b> — live map, alerts, and cost against your current schedule.
-            </li>
-          </ul>
-
-          <div className="ascii-box">
-            <pre className="ascii">{narrow ? BIN_SM : BIN}</pre>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 03 numbers ── */}
-      <section className="sec" id="numbers">
-        <div className="wrap">
-          <div className="sec-head">
-            <Label n="03">the numbers</Label>
-            <h2 className="sec-title">Same bins. A third of the trips.</h2>
-            <p className="sec-lede">
-              <b>Benchmark, not a field result.</b> Measured against a fixed-schedule baseline in{' '}
-              <a href={ENGINE} target="_blank" rel="noreferrer">
-                aerobin-routing
-              </a>
-              .
+          <div className="head rise">
+            <div className="eyebrow">
+              <i>02</i> the product
+            </div>
+            <h2 className="t">
+              Which bins actually need
+              <br />
+              a truck <em>today?</em>
+            </h2>
+            <p className="lede">
+              Clip a sensor onto a bin the campus already owns. It reads fill level and
+              contamination, sends it over <b>Verizon RedCap 5G</b>, and the route rebuilds itself
+              around the bins that are genuinely full.
             </p>
           </div>
 
-          <div className="ascii-box">
-            <pre className="ascii">{narrow ? STREET_SM : STREET}</pre>
-          </div>
-
-          <div className="grid grid-3">
-            <div className="cell stat">
-              <span className="n">87% → 0.5%</span>
-              <span className="k">wasteful pickups</span>
-            </div>
-            <div className="cell stat">
-              <span className="n">−70%</span>
-              <span className="k">servicing events</span>
-            </div>
-            <div className="cell stat">
-              <span className="n">~$100</span>
-              <span className="k">per bin, retrofit</span>
-            </div>
-          </div>
-
-          <div className="ascii-box">
-            <pre className="ascii">{numbersChart(narrow)}</pre>
+          <div className="caps rise d1">
+            {[
+              {
+                n: '01',
+                h: 'How full is it, really?',
+                p: (
+                  <>
+                    A sensor inside the rim measures <b>capacity and contamination</b> — not a
+                    guess from a collection log. Every bin, every hour.
+                  </>
+                ),
+                tags: ['fill level', 'contamination', 'tamper'],
+              },
+              {
+                n: '02',
+                h: 'How does it phone home?',
+                p: (
+                  <>
+                    <b>Verizon RedCap 5G</b> — low-power cellular built for exactly this class of
+                    device. No campus WiFi, no gateways, no new bins.
+                  </>
+                ),
+                tags: ['redcap 5g', 'low power', 'no wifi'],
+              },
+              {
+                n: '03',
+                h: 'Who gets picked up today?',
+                p: (
+                  <>
+                    The routing engine decides <b>which bins to collect and in what order</b>, and
+                    hands the crew a shorter run than the one on the calendar.
+                  </>
+                ),
+                tags: ['prediction', 'routing', 'alerts'],
+              },
+              {
+                n: '04',
+                h: 'What did it save?',
+                p: (
+                  <>
+                    Every skipped trip is logged against the old fixed schedule, so the savings
+                    case writes itself — <b>in the format procurement needs.</b>
+                  </>
+                ),
+                tags: ['roi', 'esg reporting', 'sla'],
+              },
+            ].map((c) => (
+              <div className="cap" key={c.n}>
+                <div className="num">{c.n}</div>
+                <div>
+                  <h3>{c.h}</h3>
+                  <p>{c.p}</p>
+                </div>
+                <div className="side">
+                  <div className="chips">
+                    {c.tags.map((t) => (
+                      <span className="chip" key={t}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── 04 wedge ── */}
-      <section className="sec" id="wedge">
+      {/* ── 03 hardware ── */}
+      <section className="sec" id="hardware">
+        <span className="ghost" aria-hidden>03</span>
         <div className="wrap">
-          <div className="sec-head">
-            <Label n="04">the wedge</Label>
-            <h2 className="sec-title">They sell new bins. We connect yours.</h2>
-            <p className="sec-lede">
-              Bigbelly, Enevo and the rest largely sell new connected bins. We retrofit the ones a
-              campus already owns.
+          <div className="head rise">
+            <div className="eyebrow">
+              <i>03</i> the hardware
+            </div>
+            <h2 className="t">
+              It clips on in <em>sixty seconds.</em>
+            </h2>
+            <p className="lede">
+              A sealed, solar-assisted enclosure that hooks under the rim of a bin you already own.
+              Nothing enters the bin interior. Nothing gets trenched. Nothing gets replaced.
             </p>
           </div>
 
-          <div className="rows">
-            <div className="row row-head">
-              <div>vector</div>
-              <div>aerobin</div>
-              <div>incumbent</div>
+          <div className="hw rise d1">
+            <div className="hw-img">
+              <img src={cad} alt="AeroBin sensor — front, right, top and isometric engineering views" />
             </div>
-            <div className="row">
-              <div>what you buy</div>
-              <div className="ours">a ~$100 clip-on sensor</div>
-              <div className="theirs">a whole new connected bin</div>
+            <div className="spec">
+              {[
+                ['Footprint', '140 × 100 × 65–70 mm'],
+                ['Mount', 'Cantilever spring clip, under-rim'],
+                ['Interior', 'Nothing enters the bin cavity'],
+                ['Power', 'Solar panel + internal battery pack'],
+                ['Uplink', 'Verizon RedCap 5G · ThingSpace'],
+                ['Senses', 'Fill capacity · contamination'],
+                ['Housing', 'Gasketed, weather-sealed, tamper-resistant'],
+                ['Install', '~60 seconds, no tools of consequence'],
+              ].map(([k, v]) => (
+                <div className="spec-r" key={k}>
+                  <span className="k">{k}</span>
+                  <span className="v">{v}</span>
+                </div>
+              ))}
             </div>
-            <div className="row">
-              <div>your existing bins</div>
-              <div className="ours">kept</div>
-              <div className="theirs">replaced</div>
-            </div>
-            <div className="row">
-              <div>where the value sits</div>
-              <div className="ours">software + fill history</div>
-              <div className="theirs">the steel</div>
-            </div>
+          </div>
+          <div className="src rise">
+            Engineering drawing, AeroBin V1. Dimensions in millimetres. Pre-production.
           </div>
         </div>
       </section>
 
-      {/* ── 05 model ── */}
-      <section className="sec" id="model">
+      {/* ── 04 platform ── */}
+      <section className="sec" id="platform">
+        <span className="ghost" aria-hidden>04</span>
         <div className="wrap">
-          <div className="sec-head">
-            <Label n="05">market &amp; model</Label>
-            <h2 className="sec-title">Hardware to land. Software to earn.</h2>
+          <div className="head rise">
+            <div className="eyebrow">
+              <i>04</i> the platform
+            </div>
+            <h2 className="t">
+              Every bin on campus,
+              <br />
+              on <em>one screen.</em>
+            </h2>
+            <p className="lede">
+              The sensors are the easy half. The dashboard is where a facilities team actually
+              lives — a live fleet map, the alerts that matter, and the savings case already
+              written up for procurement.
+            </p>
           </div>
-          <ul className="list">
-            <li>
-              <b>Campuses first</b> — contained geography, one facilities decision-maker. Then cities
-              and haulers.
-            </li>
-            <li>
-              <b>Hardware near cost, recurring per-bin SaaS</b> for the routing and the dashboard.
-            </li>
-            <li>
-              <b>The moat is the engine plus per-site fill history</b> — the predictions sharpen the
-              longer a site runs.
-            </li>
-            <li>
-              Smart-waste is a <b>low-single-digit-billions</b> market growing at a double-digit CAGR
-              (Grand View Research / MarketsandMarkets).
-            </li>
-          </ul>
+
+          <div className="rise d1">
+            <div className="backed-l">Clips onto what you already own</div>
+            <div className="feeds">
+              {[
+                'indoor slim bins', 'outdoor barrels', 'dumpsters', 'compactors',
+                'recycling streams', 'dining-hall waste', 'residence-hall chutes',
+              ].map((f) => (
+                <span className="feed" key={f}>{f}</span>
+              ))}
+              <span className="feed more">no new containers</span>
+            </div>
+          </div>
+
+          <div className="mods rise d2">
+            {[
+              {
+                h: 'Fleet map', b: 'live',
+                p: 'Every sensor on the campus map, coloured by fill. Click through to any bin.',
+                to: '/dashboard',
+              },
+              {
+                h: 'Fill analytics', b: 'live',
+                p: 'Fill curves per building and per stream, so patterns show up before complaints do.',
+                to: '/dashboard',
+              },
+              {
+                h: 'Route builder', b: 'live',
+                p: 'The day\u2019s collection list, ordered — built from fill, not from the calendar.',
+                to: '/dashboard',
+              },
+              {
+                h: 'Alerts', b: 'live',
+                p: 'Overflow predicted, contamination flagged, sensor gone quiet. Pushed, not polled.',
+                to: '/dashboard',
+              },
+              {
+                h: 'Savings case', b: 'live',
+                p: 'Trips skipped against the old fixed schedule, costed — the file procurement asks for.',
+                to: '/dashboard',
+              },
+              {
+                h: 'Citywide view', b: 'beta',
+                p: 'Multiple campuses and a municipal fleet under one coalition view.',
+                to: '/dashboard',
+              },
+            ].map((m) => (
+              <Link className="mod" to={m.to} key={m.h}>
+                <div className="top">
+                  <h4>{m.h}</h4>
+                  <span className={`badge ${m.b}`}>{m.b === 'live' ? 'Live' : 'Beta'}</span>
+                </div>
+                <p>{m.p}</p>
+                <span className="go">Open &#8599;</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="src rise">
+            Dashboard runs on simulated campus data until the first pilot fleet is installed.
+          </div>
         </div>
       </section>
 
-      {/* ── 06 team ── */}
-      <section className="sec" id="team">
+      {/* ── 05 path ── */}
+      <section className="sec" id="path">
+        <span className="ghost" aria-hidden>05</span>
         <div className="wrap">
-          <div className="sec-head">
-            <Label n="06">team</Label>
-            <h2 className="sec-title">Who's building it.</h2>
+          <div className="head rise">
+            <div className="eyebrow">
+              <i>05</i> the path
+            </div>
+            <h2 className="t">Land one campus. Then the city around it.</h2>
+            <p className="lede">
+              Closed campus first — contained geography, one facilities decision-maker, a real
+              sustainability mandate. Prove the savings, then widen the ring.
+            </p>
           </div>
-          <ul className="list">
-            <li>
-              <b>Azra Bano</b> — founder. Product, technical direction, and the routing engine.
-            </li>
-            <li>
-              <b>Rish Dhingra</b> — dashboard front-end.
-            </li>
-          </ul>
+
+          <div className="path rise d1">
+            {[
+              {
+                st: 'Testing & development',
+                now: true,
+                h: 'Columbia University',
+                p: 'Closed campus. Controlled deployment, instrumented from day one.',
+              },
+              {
+                st: 'Next',
+                now: false,
+                h: 'Rutgers University',
+                p: 'Open campus — public bins, real foot traffic, messier data.',
+              },
+              {
+                st: 'Then',
+                now: false,
+                h: 'New Brunswick, NJ',
+                p: 'City integration. The same sensors, a municipal fleet behind them.',
+              },
+            ].map((s) => (
+              <div className={`step${s.now ? ' now' : ''}`} key={s.h}>
+                <div className="st">
+                  <b />
+                  {s.st}
+                </div>
+                <h4>{s.h}</h4>
+                <p>{s.p}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="lede rise">
+            Grounded in <b>50+ NSF I-Corps customer discovery interviews</b> with the facilities
+            and operations staff who actually sign for this.
+          </p>
         </div>
       </section>
 
-      {/* ── cta ── */}
-      <section className="sec cta">
+      {/* ── close ── */}
+      <section className="sec close">
         <div className="wrap">
-          <div className="talk-kicker">we make</div>
-          <pre className="wordmark talk">{TALK}</pre>
-          <div className="hero-cta">
-            <a className="btn btn-primary" href={`mailto:${CONTACT_EMAIL}`}>
-              [ {CONTACT_EMAIL} ]
+          <h2 className="rise">
+            We make trash <span className="mark-hi">talk.</span>
+          </h2>
+          <p className="rise d1">
+            We're a student-founded team out of Rutgers and Columbia, building the data layer
+            under an industry that never had one.
+          </p>
+          <div className="hero-cta rise d2">
+            <a className="btn btn-1" href={`mailto:${EMAIL}`}>
+              {EMAIL}
             </a>
           </div>
         </div>
@@ -495,13 +625,12 @@ export function Site() {
       <footer className="foot">
         <div className="wrap foot-in">
           <span>AEROBIN © {new Date().getFullYear()}</span>
-          <a href={`mailto:${CONTACT_EMAIL}`}>email</a>
-          <a href={REPO} target="_blank" rel="noreferrer">
+          <a href={`mailto:${EMAIL}`}>email</a>
+          <a href="https://github.com/azrabano23/AeroBin" target="_blank" rel="noreferrer">
             github
           </a>
-          <a href={ENGINE} target="_blank" rel="noreferrer">
-            routing engine
-          </a>
+          <Link to="/dashboard">dashboard</Link>
+          <span className="sp">New Brunswick, NJ</span>
         </div>
       </footer>
     </div>
