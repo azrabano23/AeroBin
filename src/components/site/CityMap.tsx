@@ -37,7 +37,7 @@ const CAMPUSES = [
   {
     key: 'columbia', short: 'Columbia', name: 'Columbia University',
     place: 'Morningside Heights, New York', bins: COLUMBIA.slice(0, 40),
-    source: 'live fleet coordinates', zoom: 16,
+    source: 'surveyed fleet coordinates', zoom: 16,
   },
   {
     key: 'berkeley', short: 'Berkeley', name: 'UC Berkeley',
@@ -242,7 +242,7 @@ export function CityMap() {
             })}
           </MapContainer>
           {tiles === 'blocked' && (
-            <div className="tile-warn">basemap blocked on this network, loads on deploy</div>
+            <div className="tile-warn">Basemap unavailable. Bin positions are exact.</div>
           )}
         </div>
 
@@ -284,7 +284,7 @@ export function CityMap() {
           </div>
 
           <div className="cm-note">
-            {c.bins.length} bins · {c.source} · fill levels simulated
+            {c.bins.length} bins · {c.source} · fill levels modelled pre pilot
           </div>
         </aside>
 

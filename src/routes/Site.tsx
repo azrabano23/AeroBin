@@ -345,14 +345,14 @@ export function Site() {
             <div className="backed-l">The same forty bins, the same morning</div>
             <Swipe />
             <div className="src" style={{ marginTop: 12 }}>
-              Real Columbia fleet coordinates, simulated fill levels.
+              Columbia fleet coordinates are exact. Fill levels are modelled pre pilot.
             </div>
           </div>
 
           <div className="stats rise d3">
-            <Stat n={200} suffix="B" k="Spent every year on waste management in the U.S." s="Figure under verification" />
-            <Stat n={40} suffix="%" k="Of pickups happen at bins that are not even half full" s="Figure under verification" />
-            <Stat n={100} suffix=" t" k="CO2 emitted per collection truck, per year" s="Figure under verification" />
+            <Stat n={292} suffix="M t" k="Municipal solid waste the U.S. generates in a year" s="EPA Facts and Figures, 2018" />
+            <Stat n={70} suffix="%" k="Of waste operating cost is collection, not disposal" s="Ferrer and Alba, Waste Management, 2019" />
+            <Stat n={100} suffix=" t" k="CO&#8322; from a single collection truck, per year" s="~10,000 gal diesel a year at EPA equivalency" />
           </div>
         </div>
       </section>
@@ -457,7 +457,7 @@ export function Site() {
               </Link>
             ))}
           </div>
-          <div className="src rise">Dashboard runs on simulated campus data until the first pilot fleet is installed.</div>
+          <div className="src rise">Dashboard shown on modelled campus data ahead of the first pilot fleet.</div>
         </div>
       </section>
 

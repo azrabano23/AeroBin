@@ -98,7 +98,7 @@ export function ContamBar() {
           </g>
         ))}
       </svg>
-      <figcaption>Illustrative split, not measured</figcaption>
+      <figcaption>Illustrative. Contamination rates vary by stream and site.</figcaption>
     </figure>
   )
 }
