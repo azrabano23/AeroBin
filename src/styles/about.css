@@ -1,0 +1,133 @@
+/* ── AeroBin / about ──────────────────────────────────────────────────── */
+/* Deliberately almost empty. The whole page is one column of type on a dark
+   field: no cards, no borders, no small print. Scoped under .about so it
+   cannot touch the dashboard's Tailwind theme or the .site tokens. */
+
+.about {
+  --ink:   #F4F6F2;
+  --ink-2: rgba(244, 246, 242, .70);
+  --dim:   rgba(244, 246, 242, .42);
+  --bg:    #0D1711;
+  --grn:   #5FD39A;
+  --line:  rgba(244, 246, 242, .14);
+
+  --sans: 'Geist', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.about *, .about *::before, .about *::after { box-sizing: border-box; }
+.about a { color: inherit; text-decoration: none; }
+
+/* one shared entrance. A CSS animation rather than a scroll observer, so the
+   page can never be left permanently invisible if the observer never fires */
+@keyframes ab-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.about .ab-nav,
+.about .ab-lead,
+.about .ab-body,
+.about .ab-end,
+.about .ab-sig,
+.about .ab-foot { animation: ab-rise .9s cubic-bezier(.22, 1, .36, 1) both; }
+.about .ab-lead { animation-delay: .08s; }
+.about .ab-body { animation-delay: .20s; }
+.about .ab-end  { animation-delay: .30s; }
+.about .ab-sig  { animation-delay: .38s; }
+.about .ab-foot { animation-delay: .46s; }
+@media (prefers-reduced-motion: reduce) {
+  .about .ab-nav, .about .ab-lead, .about .ab-body,
+  .about .ab-end, .about .ab-sig, .about .ab-foot { animation: none; }
+}
+
+/* ── nav ───────────────────────────────────────────────────────────────── */
+
+.ab-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; padding: 30px clamp(20px, 5vw, 64px);
+}
+.ab-mark { display: inline-flex; align-items: center; gap: 10px; }
+.ab-mark svg { width: 22px; height: 22px; color: var(--ink); }
+.ab-mark span { font-size: 17px; font-weight: 600; letter-spacing: -.025em; }
+.ab-back {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--dim); transition: color .25s;
+}
+.ab-back:hover { color: var(--ink); }
+
+/* ── the column ────────────────────────────────────────────────────────── */
+
+.ab-wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding: clamp(80px, 15vh, 190px) clamp(20px, 5vw, 64px) clamp(90px, 15vh, 180px);
+}
+
+.ab-lead {
+  margin: 0 0 clamp(54px, 9vh, 110px);
+  font-size: clamp(50px, 10.5vw, 150px);
+  font-weight: 500; letter-spacing: -.05em; line-height: .9;
+  text-wrap: balance;
+}
+
+/* a measure, not a container width: long prose at this size needs a short
+   line or the eye loses its place on the return sweep */
+.ab-body { max-width: 46ch; margin-left: auto; }
+.ab-body p {
+  margin: 0 0 1.5em;
+  font-size: clamp(18px, 1.7vw, 23px);
+  line-height: 1.58; letter-spacing: -.014em;
+  color: var(--ink-2);
+}
+.ab-body p:last-child { margin-bottom: 0; }
+@media (max-width: 900px) { .ab-body { max-width: none; margin-left: 0; } }
+
+.ab-end {
+  margin: clamp(80px, 14vh, 170px) 0 0;
+  font-size: clamp(34px, 6vw, 82px);
+  font-weight: 500; letter-spacing: -.045em; line-height: 1.02;
+}
+.ab-end .g { color: var(--grn); }
+
+.ab-sig {
+  margin: clamp(26px, 4vh, 44px) 0 0;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--dim);
+}
+
+/* ── foot ──────────────────────────────────────────────────────────────── */
+
+.ab-foot {
+  border-top: 1px solid var(--line);
+  padding: clamp(44px, 7vw, 76px) clamp(20px, 5vw, 64px) 40px;
+  max-width: 1180px; margin: 0 auto;
+}
+.ab-foot-g {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 6vw, 90px);
+}
+@media (max-width: 640px) { .ab-foot-g { grid-template-columns: 1fr; gap: 34px; } }
+.ab-col h2 {
+  margin: 0 0 18px; font-family: var(--mono); font-size: 10.5px;
+  font-weight: 400; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--dim);
+}
+.ab-col ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.ab-col li { font-size: 16px; color: var(--ink); display: flex; flex-direction: column; gap: 2px; }
+.ab-col li span { font-size: 13.5px; color: var(--dim); }
+
+.ab-foot-b {
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  margin-top: clamp(48px, 8vw, 86px);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  color: var(--dim);
+}
+.ab-foot-b a { transition: color .25s; }
+.ab-foot-b a:hover { color: var(--ink); }
