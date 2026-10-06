@@ -269,6 +269,7 @@ export function Site() {
             <a href="#sensor">Sensor</a>
             <a href="#map">Map</a>
             <a href="#dashboard">Dashboard</a>
+            <Link to="/about">About</Link>
           </div>
           <a className="btn btn-sm btn-1" href={CAL} target="_blank" rel="noreferrer">Book a pilot call</a>
         </div>

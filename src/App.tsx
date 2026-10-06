@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Site } from './routes/Site'
+import { About } from './routes/About'
 
 /* The dashboard pulls in Leaflet + Recharts. Keep it out of the marketing
    bundle so the public site is a fast first paint. */
@@ -33,6 +34,7 @@ function App() {
         <Routes>
           {/* public marketing site */}
           <Route path="/" element={<Site />} />
+          <Route path="/about" element={<About />} />
           {/* previous product landing page, kept reachable */}
           <Route path="/overview" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
